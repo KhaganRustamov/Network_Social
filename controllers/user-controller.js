@@ -9,28 +9,28 @@ const UserController = {
   register: async (req, res) => {
     const { email, password, name } = req.body;
 
-    // Проверяем поля на существование
+    // Checking the fields
     if (!email || !password || !name) {
-      return res.status(400).json({ error: "Все поля обязательны" });
+      return res.status(400).json({ error: "All fields are required" });
     }
 
     try {
-      // Проверяем, существует ли пользователь с таким emai
+      // Check if a user with such email exists
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
-        return res.status(400).json({ error: "Пользователь уже существует" });
+        return res.status(400).json({ error: "User already exists" });
       }
 
-      // Хешируем пароль
+      // Hashing the password
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Генерируем аватар для нового пользователя
+      // Generate an avatar for a new user
       const png = Jdenticon.toPng(name, 200);
       const avatarName = `${name}_${Date.now()}.png`;
       const avatarPath = path.join(__dirname, "/../uploads", avatarName);
       fs.writeFileSync(avatarPath, png);
 
-      // Создаем пользователя
+      // Create a user
       const user = await prisma.user.create({
         data: {
           email,
