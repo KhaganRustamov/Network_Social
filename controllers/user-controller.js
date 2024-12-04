@@ -18,13 +18,13 @@ const UserController = {
     try {
       // Check if a user with such email or name exists
       const existingEmail = await prisma.user.findUnique({ where: { email } });
-      const existingName = await prisma.user.findUnique({ where: { name } });
+      // const existingName = await prisma.user.findUnique({ where: { name } });
       if (existingEmail) {
         return res.status(400).json({ error: "Email already exists" });
       }
-      if (existingName) {
-        return res.status(400).json({ error: "Name already exists" });
-      }
+      // if (existingName) {
+      //   return res.status(400).json({ error: "Name already exists" });
+      // }
 
       // Hashing the password
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -66,17 +66,20 @@ const UserController = {
         return res.status(400).json({ error: "Wrong email or password" });
       }
 
-      const valid = await bcrypt.compare(password, user.password);
+      const valid = await bcrypt.compare(password, existingUser.password);
 
       if (!valid) {
         return res.status(400).json({ error: "Wrong email or password" });
       }
 
-      const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY);
+      const token = jwt.sign(
+        { userId: existingUser.id },
+        process.env.SECRET_KEY
+      );
 
-      res.json(token);
+      res.json({ token });
     } catch (error) {
-      console.error("Error in register:", error);
+      console.error("Error in login:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   },
