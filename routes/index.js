@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const UserController = require("../controllers/user-controller");
+const { authenticateToken } = require("../middleware/auth");
 
 const uploadDestination = "uploads";
 
@@ -19,6 +20,6 @@ router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.get("/users/:id", UserController.getUserById);
 router.put("/users/:id", UserController.updateUser);
-router.get("/current", UserController.currentUser);
+router.get("/current", authenticateToken, UserController.currentUser);
 
 module.exports = router;
