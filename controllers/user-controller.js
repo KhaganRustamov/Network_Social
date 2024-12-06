@@ -94,6 +94,7 @@ const UserController = {
     const userId = req.user.userId;
 
     try {
+      // Search user by id
       const user = await prisma.user.findUnique({
         where: { id },
         include: { followers: true, following: true },
@@ -102,8 +103,8 @@ const UserController = {
       if (!user) {
         return res.status(404).json({ error: "User is not found" });
       }
-
-      const isFollowing = await prisma.user.findFirst({
+      // Check if the current user is subscribed to the user being searched for
+      const isFollowing = await prisma.follows.findFirst({
         where: { AND: { followerId: userId, followingId: id } },
       });
 
@@ -113,9 +114,51 @@ const UserController = {
       res.status(500).json({ error: "Internal server error" });
     }
   },
+
   updateUser: async (req, res) => {
-    res.send("OK");
+    const { id } = req.params;
+    const { email, name, dateOfBirth, bio, location } = req.body;
+
+    let filePath;
+
+    if (req.file && req.file.path) {
+      filePath = req.file.path;
+    }
+
+    // Checking that the user is updating their own information
+    if (id !== req.user.userId) {
+      return res.status(403).json({ error: "Not access" });
+    }
+
+    try {
+      if (email) {
+        const existingUser = await prisma.user.findFirst({
+          where: { email: email },
+        });
+
+        if (existingUser && existingUser.id !== parseInt(id)) {
+          return res.status(400).json({ error: "Email already exists" });
+        }
+      }
+
+      const user = await prisma.user.update({
+        where: { id },
+        data: {
+          email: email || undefined,
+          name: name || undefined,
+          avatarUrl: filePath ? `/${filePath}` : undefined,
+          dateOfBirth: dateOfBirth || undefined,
+          bio: bio || undefined,
+          location: location || undefined,
+        },
+      });
+      res.json(user);
+    } catch (error) {
+      console.error("Error in update", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   },
+
   currentUser: async (req, res) => {
     res.send("OK");
   },
