@@ -1,4 +1,4 @@
-require("dotenv").config(); // Для переменных окружения
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
@@ -8,40 +8,36 @@ const createError = require("http-errors");
 
 const app = express();
 
-// Логирование запросов
 app.use(logger("dev"));
-
-// Парсинг запросов
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Работа с cookie
 app.use(cookieParser());
 
-// Статические файлы
+// Static files
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 app.use("/uploads", express.static(uploadsDir));
 
-// Подключение маршрутов
+// Connecting routes
 const apiRoutes = require("./routes");
 app.use("/api", apiRoutes);
 
-// Обработка 404 ошибок
+// Handling 404 errors
 app.use((req, res, next) => {
   next(createError(404, "Resource not found"));
 });
 
-// Централизованная обработка ошибок
-app.use((err, req, res, next) => {
-  const isDev = req.app.get("env") === "development";
-  res.status(err.status || 500).json({
-    message: err.message,
-    ...(isDev && { stack: err.stack }), // Показываем стек только в режиме разработки
-  });
+// error handler
+app.use(function (err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get("env") === "development" ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render("error");
 });
 
-// Экспорт приложения
 module.exports = app;
