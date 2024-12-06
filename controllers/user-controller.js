@@ -130,17 +130,28 @@ const UserController = {
       return res.status(403).json({ error: "Not access" });
     }
 
+    // Check if a user with such email or name exists
     try {
       if (email) {
-        const existingUser = await prisma.user.findFirst({
-          where: { email: email },
+        const existingEmail = await prisma.user.findUnique({
+          where: { email },
         });
 
-        if (existingUser && existingUser.id !== parseInt(id)) {
+        if (existingEmail && existingEmail.id !== parseInt(id)) {
           return res.status(400).json({ error: "Email already exists" });
         }
       }
+      if (name) {
+        const existingName = await prisma.user.findFirst({
+          where: { name },
+        });
 
+        if (existingName && existingName.id !== parseInt(id)) {
+          return res.status(400).json({ error: "Name already exists" });
+        }
+      }
+
+      // Update user
       const user = await prisma.user.update({
         where: { id },
         data: {
@@ -160,7 +171,33 @@ const UserController = {
   },
 
   currentUser: async (req, res) => {
-    res.send("OK");
+    //Get current user
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.userId },
+        include: {
+          followers: {
+            include: {
+              follower: true,
+            },
+          },
+          following: {
+            include: {
+              following: true,
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: "User is not found" });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error("Error in current", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   },
 };
 
