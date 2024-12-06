@@ -1,34 +1,47 @@
-const createError = require("http-errors");
+require("dotenv").config(); // Для переменных окружения
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const fs = require("fs");
+const createError = require("http-errors");
 
 const app = express();
 
+// Логирование запросов
 app.use(logger("dev"));
+
+// Парсинг запросов
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
+
+// Работа с cookie
 app.use(cookieParser());
-app.set("view engine", "jade");
 
-app.use("/uploads", express.static("uploads"));
-app.use("/api", require("./routes"));
-
-if (!fs.existsSync("uploads")) {
-  fs.mkdirSync("uploads");
+// Статические файлы
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
 }
+app.use("/uploads", express.static(uploadsDir));
 
-app.use(function (req, res, next) {
-  next(createError(404));
+// Подключение маршрутов
+const apiRoutes = require("./routes");
+app.use("/api", apiRoutes);
+
+// Обработка 404 ошибок
+app.use((req, res, next) => {
+  next(createError(404, "Resource not found"));
 });
 
-app.use(function (err, req, res, next) {
-  res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
-  res.status(err.status || 500);
-  res.render("error");
+// Централизованная обработка ошибок
+app.use((err, req, res, next) => {
+  const isDev = req.app.get("env") === "development";
+  res.status(err.status || 500).json({
+    message: err.message,
+    ...(isDev && { stack: err.stack }), // Показываем стек только в режиме разработки
+  });
 });
 
+// Экспорт приложения
 module.exports = app;
