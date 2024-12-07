@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 
 const uploads = multer({ storage: storage });
 
-//User routes
+// User routes
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.get("/users/:id", authenticateToken, UserController.getUserById);
@@ -27,6 +27,6 @@ router.get("/current", authenticateToken, UserController.currentUser);
 router.post("/posts", authenticateToken, PostController.createPost);
 router.get("/posts", authenticateToken, PostController.getAllPosts);
 router.get("/posts/:id", authenticateToken, PostController.getPostById);
-router.delete("/posts/:id", authenticateToken, PostController.deleteUser);
+router.delete("/posts/:id", authenticateToken, PostController.deletePost);
 
 module.exports = router;
