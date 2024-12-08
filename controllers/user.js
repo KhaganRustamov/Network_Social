@@ -188,7 +188,7 @@ const UserController = {
       await prisma.user.delete({ where: { id } });
       res.json("User deleted successfully");
     } catch (error) {
-      console.error("Error in delete post:", error);
+      console.error("Error in delete user:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   },
