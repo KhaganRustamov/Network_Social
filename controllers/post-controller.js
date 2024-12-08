@@ -75,7 +75,7 @@ const PostController = {
       if (!post) {
         return res.status(404).json({ error: "Post is not found" });
       }
-      // Check like post
+      // Check liked post
       const postWithLikeInfo = {
         ...post,
         likedByUser: post.likes.some((like) => like.userId === userId),
@@ -91,10 +91,6 @@ const PostController = {
   deletePost: async (req, res) => {
     const { id } = req.params;
     const post = await prisma.post.findUnique({ where: { id } });
-
-    if (!post) {
-      return res.status(404).json({ error: "Post is not found" });
-    }
 
     // Checking that the user deleted own post
     if (post.authorId !== req.user.userId) {

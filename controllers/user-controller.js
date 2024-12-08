@@ -170,6 +170,25 @@ const UserController = {
     }
   },
 
+  deleteUser: async (req, res) => {
+    const { id } = req.params;
+    const user = await prisma.user.findUnique({ where: { id } });
+
+    // Checking that the user deleted own profile
+    if (post.authorId !== req.user.userId) {
+      return res.status(403).json({ error: "Not access" });
+    }
+
+    try {
+      // Delete user
+      await prisma.post.delete({ where: { id } });
+      res.json("User deleted successfully");
+    } catch (error) {
+      console.error("Error in delete post:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+
   currentUser: async (req, res) => {
     //Get current user
     try {

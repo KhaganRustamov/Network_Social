@@ -21,6 +21,7 @@ router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.get("/users/:id", authenticateToken, UserController.getUserById);
 router.put("/users/:id", authenticateToken, UserController.updateUser);
+router.delete("/users/:id", authenticateToken, UserController.deleteUser);
 router.get("/current", authenticateToken, UserController.currentUser);
 
 // Post routes
