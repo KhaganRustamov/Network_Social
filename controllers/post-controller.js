@@ -109,6 +109,35 @@ const PostController = {
       res.status(500).json({ error: "Internal server error" });
     }
   },
+
+  updatePost: async (req, res) => {
+    const { id } = req.params;
+    const { content } = req.body;
+    const post = await prisma.post.findUnique({ where: { id } });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post is not found" });
+    }
+
+    // Checking that the user update own post
+    if (post.authorId !== req.user.userId) {
+      return res.status(403).json({ error: "Not access" });
+    }
+
+    // Update post
+    try {
+      const newPost = await prisma.post.update({
+        where: { id },
+        data: {
+          content,
+        },
+      });
+      res.json(newPost);
+    } catch (error) {
+      console.error("Error in update post:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
 };
 
 module.exports = PostController;
