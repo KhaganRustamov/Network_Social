@@ -92,6 +92,10 @@ const PostController = {
     const { id } = req.params;
     const post = await prisma.post.findUnique({ where: { id } });
 
+    if (!post) {
+      return res.status(404).json({ error: "Post is not found" });
+    }
+
     // Checking that the user deleted own post
     if (post.authorId !== req.user.userId) {
       return res.status(403).json({ error: "Not access" });

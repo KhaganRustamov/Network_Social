@@ -174,14 +174,18 @@ const UserController = {
     const { id } = req.params;
     const user = await prisma.user.findUnique({ where: { id } });
 
+    if (!user) {
+      return res.status(404).json({ error: "User is not found" });
+    }
+
     // Checking that the user deleted own profile
-    if (post.authorId !== req.user.userId) {
+    if (user.id !== req.user.userId) {
       return res.status(403).json({ error: "Not access" });
     }
 
     try {
       // Delete user
-      await prisma.post.delete({ where: { id } });
+      await prisma.user.delete({ where: { id } });
       res.json("User deleted successfully");
     } catch (error) {
       console.error("Error in delete post:", error);
