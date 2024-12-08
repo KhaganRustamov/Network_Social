@@ -27,8 +27,8 @@ const PostController = {
 
   getAllPosts: async (req, res) => {
     const userId = req.user.userId;
-    // Get all posts
     try {
+      // Get all posts
       const posts = await prisma.post.findMany({
         include: {
           likes: true,
@@ -102,6 +102,7 @@ const PostController = {
     }
 
     try {
+      // Delete post
       await prisma.post.delete({ where: { id } });
       res.json("Post deleted successfully");
     } catch (error) {
@@ -124,8 +125,8 @@ const PostController = {
       return res.status(403).json({ error: "Not access" });
     }
 
-    // Update post
     try {
+      // Update post
       const newPost = await prisma.post.update({
         where: { id },
         data: {
