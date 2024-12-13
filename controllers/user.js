@@ -7,9 +7,9 @@ const Jdenticon = require("jdenticon");
 
 const UserController = {
   register: async (req, res) => {
-    const { email, password, name } = req.body;
-
     try {
+      const { email, password, name } = req.body;
+
       // Checking the fields
       if (!email || !password || !name) {
         return res.status(400).json({ error: "All fields are required" });
@@ -55,9 +55,9 @@ const UserController = {
   },
 
   login: async (req, res) => {
-    const { email, password } = req.body;
-
     try {
+      const { email, password } = req.body;
+
       // Checking the fields
       if (!email || !password) {
         return res.status(400).json({ error: "All fields are required" });
@@ -90,10 +90,10 @@ const UserController = {
   },
 
   getUserById: async (req, res) => {
-    const { id } = req.params;
-    const userId = req.user.userId;
-
     try {
+      const { id } = req.params;
+      const userId = req.user.userId;
+
       // Search user by id
       const user = await prisma.user.findUnique({
         where: { id },
@@ -116,10 +116,10 @@ const UserController = {
   },
 
   updateUser: async (req, res) => {
-    const { id } = req.params;
-    const { email, name, dateOfBirth, bio, location } = req.body;
-
     try {
+      const { id } = req.params;
+      const { email, name, dateOfBirth, bio, location } = req.body;
+
       let filePath;
 
       if (req.file && req.file.path) {
@@ -171,10 +171,11 @@ const UserController = {
   },
 
   deleteUser: async (req, res) => {
-    const { id } = req.params;
-    const user = await prisma.user.findUnique({ where: { id } });
-
     try {
+      const { id } = req.params;
+
+      const user = await prisma.user.findUnique({ where: { id } });
+
       if (!user) {
         return res.status(404).json({ error: "User is not found" });
       }

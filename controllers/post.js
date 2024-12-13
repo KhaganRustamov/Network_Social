@@ -2,10 +2,10 @@ const { prisma } = require("../prisma/prisma-client");
 
 const PostController = {
   createPost: async (req, res) => {
-    const { content } = req.body;
-    const authorId = req.user.userId;
-
     try {
+      const { content } = req.body;
+      const authorId = req.user.userId;
+
       if (!content) {
         return res.status(400).json({ error: "All fields are required" });
       }
@@ -26,9 +26,9 @@ const PostController = {
   },
 
   getAllPosts: async (req, res) => {
-    const userId = req.user.userId;
-
     try {
+      const userId = req.user.userId;
+
       // Get all posts
       const posts = await prisma.post.findMany({
         include: {
@@ -60,10 +60,10 @@ const PostController = {
   },
 
   getPostById: async (req, res) => {
-    const { id } = req.params;
-    const userId = req.user.userId;
-
     try {
+      const { id } = req.params;
+      const userId = req.user.userId;
+
       // Get post by id
       const post = await prisma.post.findUnique({
         where: { id },
@@ -95,10 +95,11 @@ const PostController = {
   },
 
   deletePost: async (req, res) => {
-    const { id } = req.params;
-    const post = await prisma.post.findUnique({ where: { id } });
-
     try {
+      const { id } = req.params;
+
+      const post = await prisma.post.findUnique({ where: { id } });
+
       if (!post) {
         return res.status(404).json({ error: "Post is not found" });
       }
@@ -118,11 +119,12 @@ const PostController = {
   },
 
   updatePost: async (req, res) => {
-    const { id } = req.params;
-    const { content } = req.body;
-    const post = await prisma.post.findUnique({ where: { id } });
-
     try {
+      const { id } = req.params;
+      const { content } = req.body;
+
+      const post = await prisma.post.findUnique({ where: { id } });
+
       if (!post) {
         return res.status(404).json({ error: "Post is not found" });
       }

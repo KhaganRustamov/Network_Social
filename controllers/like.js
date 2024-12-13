@@ -2,11 +2,10 @@ const { prisma } = require("../prisma/prisma-client");
 
 const LikeController = {
   toggleLikePost: async (req, res) => {
-    const { postId } = req.body;
-
-    const userId = req.user.userId;
-
     try {
+      const { postId } = req.body;
+      const userId = req.user.userId;
+
       if (!postId) {
         return res.status(400).json({ error: "postId is required" });
       }
@@ -44,11 +43,10 @@ const LikeController = {
   },
 
   toggleLikeComment: async (req, res) => {
-    const { commentId } = req.body;
-
-    const userId = req.user.userId;
-
     try {
+      const { commentId } = req.body;
+      const userId = req.user.userId;
+
       // Check if the comment exists
       const existingComment = await prisma.comment.findUnique({
         where: { id: commentId },
