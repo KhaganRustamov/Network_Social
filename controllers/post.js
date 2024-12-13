@@ -5,11 +5,11 @@ const PostController = {
     const { content } = req.body;
     const authorId = req.user.userId;
 
-    if (!content) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
-
     try {
+      if (!content) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+
       // Create post
       const post = await prisma.post.create({
         data: {
@@ -27,13 +27,19 @@ const PostController = {
 
   getAllPosts: async (req, res) => {
     const userId = req.user.userId;
+
     try {
       // Get all posts
       const posts = await prisma.post.findMany({
         include: {
           likes: true,
           author: true,
-          comments: true,
+          comments: {
+            include: {
+              likes: true,
+              user: true,
+            },
+          },
         },
         orderBy: {
           createdAt: "desc",
@@ -92,16 +98,16 @@ const PostController = {
     const { id } = req.params;
     const post = await prisma.post.findUnique({ where: { id } });
 
-    if (!post) {
-      return res.status(404).json({ error: "Post is not found" });
-    }
-
-    // Checking that the user deleted own post
-    if (post.authorId !== req.user.userId) {
-      return res.status(403).json({ error: "Not access" });
-    }
-
     try {
+      if (!post) {
+        return res.status(404).json({ error: "Post is not found" });
+      }
+
+      // Checking that the user deleted own post
+      if (post.authorId !== req.user.userId) {
+        return res.status(403).json({ error: "Not access" });
+      }
+
       // Delete post
       await prisma.post.delete({ where: { id } });
       res.json("Post deleted successfully");
@@ -116,16 +122,16 @@ const PostController = {
     const { content } = req.body;
     const post = await prisma.post.findUnique({ where: { id } });
 
-    if (!post) {
-      return res.status(404).json({ error: "Post is not found" });
-    }
-
-    // Checking that the user update own post
-    if (post.authorId !== req.user.userId) {
-      return res.status(403).json({ error: "Not access" });
-    }
-
     try {
+      if (!post) {
+        return res.status(404).json({ error: "Post is not found" });
+      }
+
+      // Checking that the user update own post
+      if (post.authorId !== req.user.userId) {
+        return res.status(403).json({ error: "Not access" });
+      }
+
       // Update post
       const newPost = await prisma.post.update({
         where: { id },

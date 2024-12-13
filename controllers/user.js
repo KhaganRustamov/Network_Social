@@ -9,12 +9,12 @@ const UserController = {
   register: async (req, res) => {
     const { email, password, name } = req.body;
 
-    // Checking the fields
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
-
     try {
+      // Checking the fields
+      if (!email || !password || !name) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+
       // Check if a user with such email or name exists
       const existingEmail = await prisma.user.findUnique({
         where: { email },
@@ -57,12 +57,12 @@ const UserController = {
   login: async (req, res) => {
     const { email, password } = req.body;
 
-    // Checking the fields
-    if (!email || !password) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
-
     try {
+      // Checking the fields
+      if (!email || !password) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+
       // Find the user
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (!existingUser) {
@@ -119,19 +119,19 @@ const UserController = {
     const { id } = req.params;
     const { email, name, dateOfBirth, bio, location } = req.body;
 
-    let filePath;
-
-    if (req.file && req.file.path) {
-      filePath = req.file.path;
-    }
-
-    // Checking that the user is updating their own information
-    if (id !== req.user.userId) {
-      return res.status(403).json({ error: "Not access" });
-    }
-
-    // Check if a user with such email or name exists
     try {
+      let filePath;
+
+      if (req.file && req.file.path) {
+        filePath = req.file.path;
+      }
+
+      // Checking that the user is updating their own information
+      if (id !== req.user.userId) {
+        return res.status(403).json({ error: "Not access" });
+      }
+
+      // Check if a user with such email or name exists
       if (email) {
         const existingEmail = await prisma.user.findUnique({
           where: { email },
@@ -174,16 +174,16 @@ const UserController = {
     const { id } = req.params;
     const user = await prisma.user.findUnique({ where: { id } });
 
-    if (!user) {
-      return res.status(404).json({ error: "User is not found" });
-    }
-
-    // Checking that the user deleted own profile
-    if (user.id !== req.user.userId) {
-      return res.status(403).json({ error: "Not access" });
-    }
-
     try {
+      if (!user) {
+        return res.status(404).json({ error: "User is not found" });
+      }
+
+      // Checking that the user deleted own profile
+      if (user.id !== req.user.userId) {
+        return res.status(403).json({ error: "Not access" });
+      }
+
       // Delete user
       await prisma.user.delete({ where: { id } });
       res.json("User deleted successfully");

@@ -4,6 +4,7 @@ const multer = require("multer");
 const UserController = require("../controllers/user");
 const PostController = require("../controllers/post");
 const CommentController = require("../controllers/comment");
+const LikeController = require("../controllers/like");
 const { authenticateToken } = require("../middleware/auth");
 
 const uploadDestination = "uploads";
@@ -41,4 +42,11 @@ router.delete(
   CommentController.deleteComment
 );
 
+// Like routes
+router.post("/likes/post", authenticateToken, LikeController.toggleLikePost);
+router.post(
+  "/likes/comment",
+  authenticateToken,
+  LikeController.toggleLikeComment
+);
 module.exports = router;
