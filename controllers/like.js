@@ -1,6 +1,6 @@
 const { prisma } = require("../prisma/prisma-client");
 
-const LikeController = {
+const Like = {
   toggleLikePost: async (req, res) => {
     try {
       const { postId } = req.body;
@@ -80,4 +80,4 @@ const LikeController = {
   },
 };
 
-module.exports = LikeController;
+module.exports = Like;

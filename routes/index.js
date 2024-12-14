@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const UserController = require("../controllers/user");
-const PostController = require("../controllers/post");
-const CommentController = require("../controllers/comment");
-const LikeController = require("../controllers/like");
-const { authenticateToken } = require("../middleware/auth");
+const User = require("../controllers/user");
+const Post = require("../controllers/post");
+const Comment = require("../controllers/comment");
+const Like = require("../controllers/like");
+const { authenticateToken } = require("../middleware/authMiddleware");
 
 const uploadDestination = "uploads";
 
@@ -18,35 +18,31 @@ const storage = multer.diskStorage({
 
 const uploads = multer({ storage: storage });
 
+// Auth routes
+router.post("/register", User.register);
+router.post("/login", User.login);
+router.post("/logout", User.logout);
+
 // User routes
-router.post("/register", UserController.register);
-router.post("/login", UserController.login);
-router.get("/users/:id", authenticateToken, UserController.getUserById);
-router.put("/users/:id", authenticateToken, UserController.updateUser);
-router.delete("/users/:id", authenticateToken, UserController.deleteUser);
-router.get("/current", authenticateToken, UserController.currentUser);
+router.get("/users/:id", authenticateToken, User.getUserById);
+router.put("/users/:id", authenticateToken, User.updateUser);
+router.delete("/users/:id", authenticateToken, User.deleteUser);
+router.get("/profile", authenticateToken, User.profile);
 
 // Post routes
-router.post("/posts", authenticateToken, PostController.createPost);
-router.get("/posts", authenticateToken, PostController.getAllPosts);
-router.get("/posts/:id", authenticateToken, PostController.getPostById);
-router.delete("/posts/:id", authenticateToken, PostController.deletePost);
-router.put("/posts/:id", authenticateToken, PostController.updatePost);
+router.post("/posts", authenticateToken, Post.createPost);
+router.get("/posts", authenticateToken, Post.getAllPosts);
+router.get("/posts/:id", authenticateToken, Post.getPostById);
+router.delete("/posts/:id", authenticateToken, Post.deletePost);
+router.put("/posts/:id", authenticateToken, Post.updatePost);
 
 // Comment routes
-router.post("/comments", authenticateToken, CommentController.createComment);
-router.put("/comments/:id", authenticateToken, CommentController.updateComment);
-router.delete(
-  "/comments/:id",
-  authenticateToken,
-  CommentController.deleteComment
-);
+router.post("/comments", authenticateToken, Comment.createComment);
+router.put("/comments/:id", authenticateToken, Comment.updateComment);
+router.delete("/comments/:id", authenticateToken, Comment.deleteComment);
 
 // Like routes
-router.post("/likes/post", authenticateToken, LikeController.toggleLikePost);
-router.post(
-  "/likes/comment",
-  authenticateToken,
-  LikeController.toggleLikeComment
-);
+router.post("/likes/post", authenticateToken, Like.toggleLikePost);
+router.post("/likes/comment", authenticateToken, Like.toggleLikeComment);
+
 module.exports = router;
