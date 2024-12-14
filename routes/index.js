@@ -5,6 +5,7 @@ const User = require("../controllers/user");
 const Post = require("../controllers/post");
 const Comment = require("../controllers/comment");
 const Like = require("../controllers/like");
+const Auth = require("../controllers/auth");
 const { authenticateToken } = require("../middleware/authMiddleware");
 
 const uploadDestination = "uploads";
@@ -19,9 +20,9 @@ const storage = multer.diskStorage({
 const uploads = multer({ storage: storage });
 
 // Auth routes
-router.post("/register", User.register);
-router.post("/login", User.login);
-router.post("/logout", User.logout);
+router.post("/register", Auth.register);
+router.post("/login", Auth.login);
+router.post("/logout", Auth.logout);
 
 // User routes
 router.get("/users/:id", authenticateToken, User.getUserById);

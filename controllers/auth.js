@@ -22,10 +22,10 @@ const Auth = {
       const existingName = await prisma.user.findFirst({ where: { name } });
 
       if (existingEmail) {
-        return res.status(400).json({ error: "Email already exists" });
+        return res.status(400).json({ error: "Email or name already exists" });
       }
       if (existingName) {
-        return res.status(400).json({ error: "Name already exists" });
+        return res.status(400).json({ error: "Email or name already exists" });
       }
 
       // Hashing the password
@@ -66,27 +66,44 @@ const Auth = {
       // Find the user
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (!existingUser) {
-        return res.status(400).json({ error: "Wrong email or password" });
+        return res.status(400).json({ error: "Invalid email or password" });
       }
 
       // Check the password
       const valid = await bcrypt.compare(password, existingUser.password);
 
       if (!valid) {
-        return res.status(400).json({ error: "Wrong email or password" });
+        return res.status(400).json({ error: "Invalid email or password" });
       }
 
       // Generate a JWT
       const token = jwt.sign(
         { userId: existingUser.id },
-        process.env.SECRET_KEY
+        process.env.SECRET_KEY,
+        { expiresIn: "1h" }
       );
 
-      res.json({ token });
+      res.cookie("authToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 3600000,
+      });
+
+      res.json({ message: "Logged in successfully", token });
     } catch (error) {
       console.error("Error in login:", error);
       res.status(500).json({ error: "Internal server error" });
     }
+  },
+
+  logout: (req, res) => {
+    res.clearCookie("authToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    res.json({ message: "Logged out successfully" });
   },
 };
 
