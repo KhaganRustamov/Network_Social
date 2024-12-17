@@ -6,7 +6,7 @@ const Post = require("../controllers/post");
 const Comment = require("../controllers/comment");
 const Like = require("../controllers/like");
 const Auth = require("../controllers/auth");
-const { authenticateToken } = require("../middleware/authMiddleware");
+const { authenticateToken } = require("../middleware/auth-middleware");
 
 const uploadDestination = "uploads";
 
