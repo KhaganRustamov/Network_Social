@@ -20,7 +20,7 @@ redisClient.on("error", (err) => {
 
 const generateAccessToken = (payload) => {
   const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-    expiresIn: "15m",
+    expiresIn: "1m",
   });
   console.log("Generating access token for:", payload);
   return accessToken;
