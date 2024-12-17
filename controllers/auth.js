@@ -74,7 +74,7 @@ const Auth = {
         return res.status(400).json({ error: "Invalid email or password" });
       }
 
-      // Check the password
+      // Checking the password
       const valid = await bcrypt.compare(password, activeUser.password);
 
       if (!valid) {
@@ -137,9 +137,11 @@ const Auth = {
           sameSite: "strict",
         });
         res.json({ message: "Logged out successfully" });
+      } else {
+        res.status(400).json({
+          error: "User already logged out",
+        });
       }
-
-      return res.status(400).json({ error: "Refresh token already deleted" });
     } catch (error) {
       console.error("Error in logout:", error);
       res.status(500).json({ error: "Internal server error" });
