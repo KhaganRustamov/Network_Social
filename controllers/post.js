@@ -3,10 +3,12 @@ const redisClient = require("../utils/redis-client");
 
 const Post = {
   createPost: async (req, res) => {
+    const cacheKeyAllPosts = "posts:all";
+    const cacheKeyPost = `posts:${id}`;
+
     try {
       const { content } = req.body;
       const authorId = req.user.userId;
-      const cacheKey = "posts:all";
 
       if (!content) {
         return res.status(400).json({ error: "All fields are required" });
@@ -21,7 +23,7 @@ const Post = {
       });
 
       // Delete cache and create post
-      await redisClient.del(cacheKey);
+      await redisClient.del(cacheKeyAllPosts);
       res.json(post);
     } catch (error) {
       console.error("Error in create post:", error);
@@ -32,13 +34,12 @@ const Post = {
   getAllPosts: async (req, res) => {
     try {
       const userId = req.user.userId;
-      const cacheKey = "posts:all";
-      const cachedPosts = await redisClient.get(cacheKey);
+      await redisClient.get(cacheKeyAllPosts);
 
       // Check cached posts
-      if (cachedPosts) {
+      if (cacheKeyAllPosts) {
         console.log("Returning cached posts");
-        return res.json(JSON.parse(cachedPosts));
+        return res.json(JSON.parse(cacheKeyAllPosts));
       }
 
       // Get all posts
@@ -65,9 +66,13 @@ const Post = {
       }));
 
       // Set cache
-      await redisClient.set(cacheKey, JSON.stringify(postWithLikeInfo), {
-        EX: 3600,
-      });
+      await redisClient.set(
+        cacheKeyAllPosts,
+        JSON.stringify(postWithLikeInfo),
+        {
+          EX: 3600,
+        }
+      );
 
       res.json(postWithLikeInfo);
     } catch (error) {
@@ -143,7 +148,8 @@ const Post = {
       // Delete post and cache
       await prisma.post.delete({ where: { id } });
       await redisClient.del(cacheKey);
-      res.json("Post deleted successfully");
+
+      res.json({ message: "Post deleted successfully" });
     } catch (error) {
       console.error("Error in delete post:", error);
       res.status(500).json({ error: "Internal server error" });
@@ -177,6 +183,7 @@ const Post = {
 
       // Delete cache and update post
       await redisClient.del(cacheKey);
+
       res.json(newPost);
     } catch (error) {
       console.error("Error in update post:", error);
