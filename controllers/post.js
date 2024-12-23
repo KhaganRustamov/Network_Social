@@ -1,10 +1,12 @@
 const { prisma } = require("../prisma/prisma-client");
+const redisClient = require("../utils/redis-client");
 
 const Post = {
   createPost: async (req, res) => {
     try {
       const { content } = req.body;
       const authorId = req.user.userId;
+      const cacheKey = "posts:all";
 
       if (!content) {
         return res.status(400).json({ error: "All fields are required" });
@@ -18,6 +20,8 @@ const Post = {
         },
       });
 
+      // Delete cache and create post
+      await redisClient.del(cacheKey);
       res.json(post);
     } catch (error) {
       console.error("Error in create post:", error);
@@ -28,6 +32,14 @@ const Post = {
   getAllPosts: async (req, res) => {
     try {
       const userId = req.user.userId;
+      const cacheKey = "posts:all";
+      const cachedPosts = await redisClient.get(cacheKey);
+
+      // Check cached posts
+      if (cachedPosts) {
+        console.log("Returning cached posts");
+        return res.json(JSON.parse(cachedPosts));
+      }
 
       // Get all posts
       const posts = await prisma.post.findMany({
@@ -52,6 +64,11 @@ const Post = {
         likedByUser: post.likes.some((like) => like.userId === userId),
       }));
 
+      // Set cache
+      await redisClient.set(cacheKey, JSON.stringify(postWithLikeInfo), {
+        EX: 3600,
+      });
+
       res.json(postWithLikeInfo);
     } catch (error) {
       console.error("Error in get posts:", error);
@@ -63,6 +80,14 @@ const Post = {
     try {
       const { id } = req.params;
       const userId = req.user.userId;
+      const cacheKey = `posts:${id}`;
+      const cachedPost = await redisClient.get(cacheKey);
+
+      // Check cached post
+      if (cachedPost) {
+        console.log("Returning cached post");
+        return res.json(JSON.parse(cachedPost));
+      }
 
       // Get post by id
       const post = await prisma.post.findUnique({
@@ -87,6 +112,11 @@ const Post = {
         likedByUser: post.likes.some((like) => like.userId === userId),
       };
 
+      // Set cache
+      await redisClient.set(cacheKey, JSON.stringify(postWithLikeInfo), {
+        EX: 3600,
+      });
+
       res.json(postWithLikeInfo);
     } catch (error) {
       console.error("Error in get post:", error);
@@ -97,6 +127,7 @@ const Post = {
   deletePost: async (req, res) => {
     try {
       const { id } = req.params;
+      const cacheKey = `posts:${id}`;
 
       const post = await prisma.post.findUnique({ where: { id } });
 
@@ -109,8 +140,9 @@ const Post = {
         return res.status(403).json({ error: "Not access" });
       }
 
-      // Delete post
+      // Delete post and cache
       await prisma.post.delete({ where: { id } });
+      await redisClient.del(cacheKey);
       res.json("Post deleted successfully");
     } catch (error) {
       console.error("Error in delete post:", error);
@@ -122,6 +154,7 @@ const Post = {
     try {
       const { id } = req.params;
       const { content } = req.body;
+      const cacheKey = `posts:${id}`;
 
       const post = await prisma.post.findUnique({ where: { id } });
 
@@ -141,6 +174,9 @@ const Post = {
           content,
         },
       });
+
+      // Delete cache and update post
+      await redisClient.del(cacheKey);
       res.json(newPost);
     } catch (error) {
       console.error("Error in update post:", error);

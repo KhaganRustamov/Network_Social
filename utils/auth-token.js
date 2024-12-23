@@ -1,23 +1,12 @@
 const jwt = require("jsonwebtoken");
-const redis = require("redis");
 const crypto = require("crypto");
+const redisClient = require("./redis-client");
 
+// Init secret keys
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
-const redisClient = redis.createClient();
-
-redisClient.on("error", (err) => {
-  console.error("Redis error:", err);
-});
-
-(async () => {
-  if (!redisClient.isOpen) {
-    await redisClient.connect();
-    console.log("Redis connected");
-  }
-})();
-
+// Generate access token
 const generateAccessToken = (payload) => {
   const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
     expiresIn: "15m",
@@ -26,6 +15,7 @@ const generateAccessToken = (payload) => {
   return accessToken;
 };
 
+// Generate refresh token
 const generateRefreshToken = async (payload) => {
   const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
     expiresIn: "7d",
@@ -43,6 +33,7 @@ const generateRefreshToken = async (payload) => {
   return refreshToken;
 };
 
+// Verify refresh token
 const verifyRefreshToken = async (refreshToken) => {
   const hashedToken = crypto
     .createHash("sha256")
@@ -53,17 +44,11 @@ const verifyRefreshToken = async (refreshToken) => {
   return userData ? JSON.parse(userData) : null;
 };
 
+// Delete refresh token
 const deleteRefreshToken = async (refreshToken) => {
   await redisClient.del(refreshToken);
   console.log("Deleting refresh token:", refreshToken);
 };
-
-process.on("SIGINT", async () => {
-  if (redisClient.isOpen) {
-    await redisClient.quit();
-  }
-  process.exit(0);
-});
 
 module.exports = {
   generateAccessToken,

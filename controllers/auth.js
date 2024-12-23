@@ -8,7 +8,7 @@ const {
   generateRefreshToken,
   verifyRefreshToken,
   deleteRefreshToken,
-} = require("../utils/auth-utils");
+} = require("../utils/auth-token");
 
 const Auth = {
   register: async (req, res) => {

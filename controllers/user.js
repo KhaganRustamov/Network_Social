@@ -77,7 +77,7 @@ const User = {
       });
       res.json(user);
     } catch (error) {
-      console.error("Error in update", error);
+      console.error("Error in update user", error);
       res.status(500).json({ error: "Internal server error" });
     }
   },
@@ -131,7 +131,7 @@ const User = {
 
       res.json(user);
     } catch (error) {
-      console.error("Error in current", error);
+      console.error("Error in profile", error);
       res.status(500).json({ error: "Internal server error" });
     }
   },
