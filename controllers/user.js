@@ -1,8 +1,18 @@
 const { prisma } = require("../prisma/prisma-client");
+const redisClient = require("../utils/redis-client");
+const cacheKeys = require("../utils/cacheKeys");
 
 const User = {
   getAllUsers: async (req, res) => {
     try {
+      const cachedUsers = await redisClient.get(cacheKeys.USERS_ALL);
+
+      // Check cached users
+      if (cachedUsers) {
+        console.log("Returning cached users");
+        return res.json(JSON.parse(cachedUsers));
+      }
+
       // Get all users
       const users = await prisma.user.findMany({
         select: {
@@ -13,6 +23,11 @@ const User = {
         orderBy: {
           createdAt: "asc",
         },
+      });
+
+      // Set cache
+      await redisClient.set(cacheKeys.USERS_ALL, JSON.stringify(users), {
+        EX: 3600,
       });
 
       res.json(users);
@@ -27,6 +42,14 @@ const User = {
       const { id } = req.params;
       const userId = req.user.userId;
 
+      const cachedUser = await redisClient.get(cacheKeys.USERS_ALL);
+
+      // Check cached user
+      if (cachedUser) {
+        console.log("Returning cached user");
+        return res.json(JSON.parse(cachedUser));
+      }
+
       // Search user by id
       const user = await prisma.user.findUnique({
         where: { id },
@@ -39,6 +62,11 @@ const User = {
       // Check if the current user is subscribed to the user being searched for
       const isFollowing = await prisma.follows.findFirst({
         where: { AND: { followerId: userId, followingId: id } },
+      });
+
+      // Set cache
+      await redisClient.set(cacheKeys.USERS_ALL, JSON.stringify(user), {
+        EX: 3600,
       });
 
       res.json({ ...user, isFollowing: Boolean(isFollowing) });
@@ -96,6 +124,10 @@ const User = {
           location: location || undefined,
         },
       });
+
+      // Delete cache
+      await redisClient.del(cacheKeys.USERS_ALL);
+
       res.json(user);
     } catch (error) {
       console.error("Error in update user", error);
@@ -118,8 +150,10 @@ const User = {
         return res.status(403).json({ error: "Not access" });
       }
 
-      // Delete user
+      // Delete user and cache
       await prisma.user.delete({ where: { id } });
+      await redisClient.del(cacheKeys.USERS_ALL);
+
       res.json(`User: ${id} deleted successfully`);
     } catch (error) {
       console.error("Error in delete user:", error);
