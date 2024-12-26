@@ -26,6 +26,7 @@ router.post("/logout", Auth.logout);
 router.post("/refreshToken", Auth.refreshToken);
 
 // User routes
+router.get("/users", authenticateToken, User.getAllUsers);
 router.get("/users/:id", authenticateToken, User.getUserById);
 router.put("/users/:id", authenticateToken, User.updateUser);
 router.delete("/users/:id", authenticateToken, User.deleteUser);

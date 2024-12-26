@@ -1,6 +1,27 @@
 const { prisma } = require("../prisma/prisma-client");
 
 const User = {
+  getAllUsers: async (req, res) => {
+    try {
+      // Get all users
+      const users = await prisma.user.findMany({
+        select: {
+          name: true,
+          avatarUrl: true,
+          dateOfBirth: true,
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+      });
+
+      res.json(users);
+    } catch (error) {
+      console.error("Error in get users:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+
   getUserById: async (req, res) => {
     try {
       const { id } = req.params;
