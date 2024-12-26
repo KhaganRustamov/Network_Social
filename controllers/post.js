@@ -1,6 +1,6 @@
 const { prisma } = require("../prisma/prisma-client");
 const redisClient = require("../utils/redis-client");
-const CacheKeys = require("../utils/cacheKeys");
+const cacheKeys = require("../utils/cacheKeys");
 
 const Post = {
   createPost: async (req, res) => {
@@ -21,7 +21,7 @@ const Post = {
       });
 
       // Delete cache and create post
-      await redisClient.del(CacheKeys.POSTS_ALL);
+      await redisClient.del(cacheKeys.POSTS_ALL);
       res.json(post);
     } catch (error) {
       console.error("Error in create post:", error);
@@ -32,7 +32,7 @@ const Post = {
   getAllPosts: async (req, res) => {
     try {
       const userId = req.user.userId;
-      const cachedPosts = await redisClient.get(CacheKeys.POSTS_ALL);
+      const cachedPosts = await redisClient.get(cacheKeys.POSTS_ALL);
 
       // Check cached posts
       if (cachedPosts) {
@@ -65,7 +65,7 @@ const Post = {
 
       // Set cache
       await redisClient.set(
-        CacheKeys.POSTS_ALL,
+        cacheKeys.POSTS_ALL,
         JSON.stringify(postWithLikeInfo),
         {
           EX: 3600,
@@ -84,7 +84,7 @@ const Post = {
       const { id } = req.params;
       const userId = req.user.userId;
 
-      const cachedPost = await redisClient.get(CacheKeys.POSTS_ALL);
+      const cachedPost = await redisClient.get(cacheKeys.POSTS_ALL);
 
       // Check cached post
       if (cachedPost) {
@@ -117,7 +117,7 @@ const Post = {
 
       // Set cache
       await redisClient.set(
-        CacheKeys.POSTS_ALL,
+        cacheKeys.POSTS_ALL,
         JSON.stringify(postWithLikeInfo),
         {
           EX: 3600,
@@ -148,7 +148,7 @@ const Post = {
 
       // Delete post and cache
       await prisma.post.delete({ where: { id } });
-      await redisClient.del(CacheKeys.POSTS_ALL);
+      await redisClient.del(cacheKeys.POSTS_ALL);
 
       res.json({ message: `Post: ${id} deleted successfully` });
     } catch (error) {
@@ -182,7 +182,7 @@ const Post = {
       });
 
       // Delete cache and update post
-      await redisClient.del(CacheKeys.POSTS_ALL);
+      await redisClient.del(cacheKeys.POSTS_ALL);
 
       res.json(newPost);
     } catch (error) {

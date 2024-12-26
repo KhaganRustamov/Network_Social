@@ -99,7 +99,7 @@ const User = {
 
       // Delete user
       await prisma.user.delete({ where: { id } });
-      res.json("User deleted successfully");
+      res.json(`User: ${id} deleted successfully`);
     } catch (error) {
       console.error("Error in delete user:", error);
       res.status(500).json({ error: "Internal server error" });
