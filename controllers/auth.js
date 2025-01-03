@@ -109,26 +109,6 @@ const Auth = {
 
       const payload = await verifyRefreshToken(refreshToken);
 
-      if (!payload) {
-        return res
-          .status(403)
-          .json({ error: "The deleted user doesn't have a refresh token." });
-      }
-
-      const userExists = await prisma.user.findUnique({
-        where: { id: payload.userId },
-      });
-
-      if (!userExists) {
-        await deleteRefreshToken(refreshToken);
-        res.clearCookie("refreshToken", {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
-        });
-        return res.status(404).json({ error: "User not found or deleted" });
-      }
-
       const newAccessToken = generateAccessToken({
         userId: payload.userId,
       });
@@ -154,7 +134,7 @@ const Auth = {
         res.json({ message: "Logged out successfully" });
       } else {
         res.status(400).json({
-          error: "User already logged out",
+          error: "User already logged out or doesn't exists",
         });
       }
     } catch (error) {

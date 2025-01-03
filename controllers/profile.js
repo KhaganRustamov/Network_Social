@@ -1,6 +1,7 @@
 const { prisma } = require("../prisma/prisma-client");
 const redisClient = require("../utils/redis-client");
 const cacheKeys = require("../utils/cacheKeys");
+const { deleteRefreshToken } = require("../utils/auth-token");
 
 const Profile = {
   getProfile: async (req, res) => {
@@ -103,14 +104,23 @@ const Profile = {
   deleteProfile: async (req, res) => {
     try {
       const { id } = req.params;
+      const { refreshToken } = req.cookies;
 
-      // Delete profile and his posts
       await prisma.post.deleteMany({
         where: {
           authorId: id,
         },
       });
+
       await prisma.user.delete({ where: { id } });
+
+      await deleteRefreshToken(refreshToken);
+
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
 
       // Delete caches
       // await redisClient.del(cacheKeys.POSTS_ALL);
