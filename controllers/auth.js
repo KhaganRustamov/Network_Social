@@ -112,15 +112,30 @@ const Auth = {
       if (!payload) {
         return res
           .status(403)
-          .json({ error: "Invalid or expired refresh token" });
+          .json({ error: "The deleted user doesn't have a refresh token." });
+      }
+
+      const userExists = await prisma.user.findUnique({
+        where: { id: payload.userId },
+      });
+
+      if (!userExists) {
+        await deleteRefreshToken(refreshToken);
+        res.clearCookie("refreshToken", {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+        });
+        return res.status(404).json({ error: "User not found or deleted" });
       }
 
       const newAccessToken = generateAccessToken({
         userId: payload.userId,
       });
+
       res.json({ accessToken: newAccessToken });
     } catch (error) {
-      console.error("Error in refresh token:", error);
+      console.error("Error in refreshToken:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   },

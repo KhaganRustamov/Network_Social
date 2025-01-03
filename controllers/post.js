@@ -20,8 +20,7 @@ const Post = {
         },
       });
 
-      // Delete cache and create post
-      await redisClient.del(cacheKeys.POSTS_ALL);
+      // await redisClient.del(cacheKeys.POSTS_ALL);
       res.json(post);
     } catch (error) {
       console.error("Error in create post:", error);
@@ -32,19 +31,18 @@ const Post = {
   getAllPosts: async (req, res) => {
     try {
       const userId = req.user.userId;
-      const cachedPosts = await redisClient.get(cacheKeys.POSTS_ALL);
+      // const cachedPosts = await redisClient.get(cacheKeys.POSTS_ALL);
 
-      // Check cached posts
-      if (cachedPosts) {
-        console.log("Returning cached posts");
-        return res.json(JSON.parse(cachedPosts));
-      }
+      // // Check cached posts
+      // if (cachedPosts) {
+      //   console.log("Returning cached posts");
+      //   return res.json(JSON.parse(cachedPosts));
+      // }
 
       // Get all posts
       const posts = await prisma.post.findMany({
         include: {
           likes: true,
-          author: true,
           comments: {
             include: {
               likes: true,
@@ -64,17 +62,17 @@ const Post = {
       }));
 
       // Set cache
-      await redisClient.set(
-        cacheKeys.POSTS_ALL,
-        JSON.stringify(postWithLikeInfo),
-        {
-          EX: 3600,
-        }
-      );
+      // await redisClient.set(
+      //   cacheKeys.POSTS_ALL,
+      //   JSON.stringify(postWithLikeInfo),
+      //   {
+      //     EX: 3600,
+      //   }
+      // );
 
       res.json(postWithLikeInfo);
     } catch (error) {
-      console.error("Error in get posts:", error);
+      console.error("Error in getAllPosts:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   },
@@ -84,13 +82,13 @@ const Post = {
       const { id } = req.params;
       const userId = req.user.userId;
 
-      const cachedPost = await redisClient.get(cacheKeys.POSTS_ALL);
+      // const cachedPost = await redisClient.get(cacheKeys.POST_BY_ID(id));
 
       // Check cached post
-      if (cachedPost) {
-        console.log("Returning cached post");
-        return res.json(JSON.parse(cachedPost));
-      }
+      // if (cachedPost) {
+      //   console.log("Returning cached post");
+      //   return res.json(JSON.parse(cachedPost));
+      // }
 
       // Get post by id
       const post = await prisma.post.findUnique({
@@ -116,17 +114,17 @@ const Post = {
       };
 
       // Set cache
-      await redisClient.set(
-        cacheKeys.POSTS_ALL,
-        JSON.stringify(postWithLikeInfo),
-        {
-          EX: 3600,
-        }
-      );
+      // await redisClient.set(
+      //   cacheKeys.POST_BY_ID(id),
+      //   JSON.stringify(postWithLikeInfo),
+      //   {
+      //     EX: 3600,
+      //   }
+      // );
 
       res.json(postWithLikeInfo);
     } catch (error) {
-      console.error("Error in get post:", error);
+      console.error("Error in getPostById:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   },
@@ -148,11 +146,11 @@ const Post = {
 
       // Delete post and cache
       await prisma.post.delete({ where: { id } });
-      await redisClient.del(cacheKeys.POSTS_ALL);
+      // await redisClient.del(cacheKeys.POSTS_ALL);
 
-      res.json({ message: `Post: ${id} deleted successfully` });
+      res.json({ message: `Post with id: ${id} deleted successfully` });
     } catch (error) {
-      console.error("Error in delete post:", error);
+      console.error("Error in deletePost:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   },
@@ -182,11 +180,11 @@ const Post = {
       });
 
       // Delete cache and update post
-      await redisClient.del(cacheKeys.POSTS_ALL);
+      // await redisClient.del(cacheKeys.POSTS_ALL);
 
       res.json(newPost);
     } catch (error) {
-      console.error("Error in update post:", error);
+      console.error("Error in updatePost:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   },
