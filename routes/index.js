@@ -7,8 +7,8 @@ const Comment = require("../controllers/comment");
 const Like = require("../controllers/like");
 const Auth = require("../controllers/auth");
 const Profile = require("../controllers/profile");
-const { authenticateToken } = require("../middleware/authenticateToken");
-const { checkUserExists } = require("../middleware/checkUserExists");
+const { accessToken } = require("../middleware/accessToken");
+const { refreshToken } = require("../middleware/refreshToken");
 const { editProfile } = require("../middleware/editProfile");
 
 const uploadDestination = "uploads";
@@ -29,69 +29,49 @@ router.post("/logout", Auth.logout);
 router.post("/refreshToken", Auth.refreshToken);
 
 // Profile routes
-router.get("/profile", authenticateToken, checkUserExists, Profile.getProfile);
+router.get("/profile", accessToken, refreshToken, Profile.getProfile);
 router.put(
   "/profile/:id",
-  authenticateToken,
-  checkUserExists,
+  accessToken,
+  refreshToken,
   editProfile,
   Profile.updateProfile
 );
 router.delete(
   "/profile/:id",
-  authenticateToken,
-  checkUserExists,
+  accessToken,
+  refreshToken,
   editProfile,
   Profile.deleteProfile
 );
 
 // User routes
-router.get("/users", authenticateToken, checkUserExists, User.getAllUsers);
-router.get("/users/:id", authenticateToken, checkUserExists, User.getUserById);
+router.get("/users", accessToken, refreshToken, User.getAllUsers);
+router.get("/users/:id", accessToken, refreshToken, User.getUserById);
 
 // Post routes
-router.post("/posts", authenticateToken, checkUserExists, Post.createPost);
-router.get("/posts", authenticateToken, checkUserExists, Post.getAllPosts);
-router.get("/posts/:id", authenticateToken, checkUserExists, Post.getPostById);
-router.delete(
-  "/posts/:id",
-  authenticateToken,
-  checkUserExists,
-  Post.deletePost
-);
-router.put("/posts/:id", authenticateToken, checkUserExists, Post.updatePost);
+router.post("/posts", accessToken, refreshToken, Post.createPost);
+router.get("/posts", accessToken, refreshToken, Post.getAllPosts);
+router.get("/posts/:id", accessToken, refreshToken, Post.getPostById);
+router.delete("/posts/:id", accessToken, refreshToken, Post.deletePost);
+router.put("/posts/:id", accessToken, refreshToken, Post.updatePost);
 
 // Comment routes
-router.post(
-  "/comments",
-  authenticateToken,
-  checkUserExists,
-  Comment.createComment
-);
-router.put(
-  "/comments/:id",
-  authenticateToken,
-  checkUserExists,
-  Comment.updateComment
-);
+router.post("/comments", accessToken, refreshToken, Comment.createComment);
+router.put("/comments/:id", accessToken, refreshToken, Comment.updateComment);
 router.delete(
   "/comments/:id",
-  authenticateToken,
-  checkUserExists,
+  accessToken,
+  refreshToken,
   Comment.deleteComment
 );
 
 // Like routes
-router.post(
-  "/likes/post",
-  authenticateToken,
-  checkUserExists,
-  Like.toggleLikePost
-);
+router.post("/likes/post", accessToken, refreshToken, Like.toggleLikePost);
 router.post(
   "/likes/comment",
-  authenticateToken,
-  checkUserExists,
+  accessToken,
+  refreshToken,
   Like.toggleLikeComment
 );
 

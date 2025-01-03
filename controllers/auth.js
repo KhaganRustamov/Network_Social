@@ -8,6 +8,7 @@ const {
   generateRefreshToken,
   verifyRefreshToken,
   deleteRefreshToken,
+  deleteAccessToken,
 } = require("../utils/auth-token");
 
 const Auth = {

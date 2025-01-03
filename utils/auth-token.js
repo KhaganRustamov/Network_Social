@@ -9,7 +9,7 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 // Generate access token
 const generateAccessToken = (payload) => {
   const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-    expiresIn: "15m",
+    expiresIn: "1m",
   });
   console.log("Generating access token for:", payload);
   return accessToken;
@@ -44,6 +44,12 @@ const verifyRefreshToken = async (refreshToken) => {
   return userData ? JSON.parse(userData) : null;
 };
 
+// Delete access token
+const deleteAccessToken = async (accessToken) => {
+  await redisClient.del(accessToken);
+  console.log("Deleting access token:", accessToken);
+};
+
 // Delete refresh token
 const deleteRefreshToken = async (refreshToken) => {
   await redisClient.del(refreshToken);
@@ -55,4 +61,5 @@ module.exports = {
   generateRefreshToken,
   verifyRefreshToken,
   deleteRefreshToken,
+  deleteAccessToken,
 };
