@@ -8,7 +8,7 @@ const refreshToken = (req, res, next) => {
       if (err) {
         return res
           .status(403)
-          .json({ error: "Invalid or expired refresh token" });
+          .json({ error: "User logged out or doesn't exists" });
       }
 
       req.user = user;

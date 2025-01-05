@@ -134,7 +134,7 @@ const Auth = {
         });
         res.json({ message: "Logged out successfully" });
       } else {
-        res.status(400).json({
+        res.status(403).json({
           error: "User already logged out or doesn't exists",
         });
       }
