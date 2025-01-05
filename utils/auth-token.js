@@ -44,12 +44,6 @@ const verifyRefreshToken = async (refreshToken) => {
   return userData ? JSON.parse(userData) : null;
 };
 
-// Delete access token
-const deleteAccessToken = async (accessToken) => {
-  await redisClient.del(accessToken);
-  console.log("Deleting access token:", accessToken);
-};
-
 // Delete refresh token
 const deleteRefreshToken = async (refreshToken) => {
   await redisClient.del(refreshToken);
