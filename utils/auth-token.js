@@ -63,11 +63,6 @@ const verifyRefreshToken = async (refreshToken) => {
     .update(refreshToken)
     .digest("hex");
   const userData = await redisClient.get(hashedToken);
-
-  if (!userData) {
-    throw new Error("Refresh token not found or expired");
-  }
-
   return JSON.parse(userData);
 };
 
