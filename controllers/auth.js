@@ -4,7 +4,8 @@ const fs = require("fs");
 const { prisma } = require("../prisma/prisma-client");
 const Jdenticon = require("jdenticon");
 const {
-  generateAccessToken,
+  generateLongAccessToken,
+  generateShortAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
   deleteRefreshToken,
@@ -82,7 +83,7 @@ const Auth = {
       }
 
       const payload = { userId: activeUser.id };
-      const accessToken = generateAccessToken(payload);
+      const accessToken = await generateShortAccessToken(payload);
       const refreshToken = await generateRefreshToken(payload);
 
       res.cookie("refreshToken", refreshToken, {
@@ -103,20 +104,18 @@ const Auth = {
     try {
       const { refreshToken } = req.cookies;
 
-      if (!refreshToken) {
-        return res.status(401).json({ error: "Refresh token missing" });
-      }
+      const userData = await verifyRefreshToken(refreshToken);
 
-      const payload = await verifyRefreshToken(refreshToken);
-
-      const newAccessToken = generateAccessToken({
-        userId: payload.userId,
+      const newAccessToken = await generateLongAccessToken({
+        userId: userData.userId,
       });
 
-      res.json({ accessToken: newAccessToken });
+      res.json({
+        accessToken: newAccessToken,
+      });
     } catch (error) {
       console.error("Error in refreshToken:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(403).json({ error: "Invalid or expired refresh token" });
     }
   },
 
@@ -124,19 +123,15 @@ const Auth = {
     try {
       const { refreshToken } = req.cookies;
 
-      if (refreshToken) {
-        await deleteRefreshToken(refreshToken);
-        res.clearCookie("refreshToken", {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
-        });
-        res.json({ message: "Logged out successfully" });
-      } else {
-        res.status(403).json({
-          error: "User already logged out or doesn't exists",
-        });
-      }
+      await deleteRefreshToken(refreshToken);
+
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      res.json({ message: "Logged out successfully" });
     } catch (error) {
       console.error("Error in logout:", error);
       res.status(500).json({ error: "Internal server error" });
