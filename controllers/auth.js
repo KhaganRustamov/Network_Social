@@ -82,7 +82,7 @@ const Auth = {
       }
 
       const payload = { userId: activeUser.id };
-      const shortToken = await generateAccessToken(payload, "1m");
+      const shortAccessToken = await generateAccessToken(payload, "1m");
       const refreshToken = await generateRefreshToken(payload);
 
       res.cookie("refreshToken", refreshToken, {
@@ -92,7 +92,7 @@ const Auth = {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.json({ shortToken });
+      res.json({ shortAccessToken });
     } catch (error) {
       console.error("Error in login:", error);
       res.status(500).json({ error: "Internal server error" });
@@ -105,7 +105,7 @@ const Auth = {
 
       const userData = await verifyRefreshToken(refreshToken);
 
-      const longToken = await generateAccessToken(
+      const longAccessToken = await generateAccessToken(
         {
           userId: userData.userId,
         },
@@ -113,7 +113,7 @@ const Auth = {
       );
 
       res.json({
-        accessToken: longToken,
+        accessToken: longAccessToken,
       });
     } catch (error) {
       console.error("Error in refreshToken:", error);

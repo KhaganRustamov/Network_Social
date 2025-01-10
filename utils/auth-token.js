@@ -11,7 +11,7 @@ const hashToken = (token) => {
   return crypto.createHash("sha256").update(token).digest("hex");
 };
 
-// Generate short-lived time access token
+// Generate access token
 const generateAccessToken = async (payload, expiresIn) => {
   const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
     expiresIn,
