@@ -22,7 +22,7 @@ const generateAccessToken = async (payload, expiresIn) => {
     parseInt(expiresIn) * 60,
     JSON.stringify(payload)
   );
-  console.log(`Generating access token with expiresIn: ${expiresIn}`);
+  console.log("Generating access token");
   return accessToken;
 };
 
