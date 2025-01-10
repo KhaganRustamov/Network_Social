@@ -4,8 +4,7 @@ const fs = require("fs");
 const { prisma } = require("../prisma/prisma-client");
 const Jdenticon = require("jdenticon");
 const {
-  generateLongAccessToken,
-  generateShortAccessToken,
+  generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
   deleteRefreshToken,
@@ -83,7 +82,7 @@ const Auth = {
       }
 
       const payload = { userId: activeUser.id };
-      const accessToken = await generateShortAccessToken(payload);
+      const shortToken = await generateAccessToken(payload, "1m");
       const refreshToken = await generateRefreshToken(payload);
 
       res.cookie("refreshToken", refreshToken, {
@@ -93,7 +92,7 @@ const Auth = {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.json({ accessToken });
+      res.json({ shortToken });
     } catch (error) {
       console.error("Error in login:", error);
       res.status(500).json({ error: "Internal server error" });
@@ -106,12 +105,15 @@ const Auth = {
 
       const userData = await verifyRefreshToken(refreshToken);
 
-      const newAccessToken = await generateLongAccessToken({
-        userId: userData.userId,
-      });
+      const longToken = await generateAccessToken(
+        {
+          userId: userData.userId,
+        },
+        "7d"
+      );
 
       res.json({
-        accessToken: newAccessToken,
+        accessToken: longToken,
       });
     } catch (error) {
       console.error("Error in refreshToken:", error);
