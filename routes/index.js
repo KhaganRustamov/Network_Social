@@ -24,7 +24,7 @@ const uploads = multer({ storage: storage });
 // Auth routes
 router.post("/register", Auth.register);
 router.post("/login", Auth.login);
-router.post("/logout", Auth.logout);
+router.post("/logout", checkSession, Auth.logout);
 // router.post("/refreshToken", Auth.refreshToken);
 
 // Profile routes
