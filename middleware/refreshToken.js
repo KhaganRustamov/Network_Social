@@ -4,11 +4,15 @@ const refreshToken = (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
 
+    if (!refreshToken) {
+      return res.status(401).json({ error: "No refresh token provided" });
+    }
+
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
       if (err) {
         return res
           .status(403)
-          .json({ error: "User logged out or doesn't exists" });
+          .json({ error: "Invalid or expired refresh token" });
       }
 
       req.user = user;
