@@ -3,12 +3,12 @@ const path = require("path");
 const fs = require("fs");
 const { prisma } = require("../prisma/prisma-client");
 const Jdenticon = require("jdenticon");
-const {
-  generateAccessToken,
-  generateRefreshToken,
-  verifyRefreshToken,
-  deleteRefreshToken,
-} = require("../utils/auth-token");
+// const {
+//   generateAccessToken,
+//   generateRefreshToken,
+//   verifyRefreshToken,
+//   deleteRefreshToken,
+// } = require("../utils/auth-token");
 
 const Auth = {
   register: async (req, res) => {
@@ -78,59 +78,67 @@ const Auth = {
         return res.status(400).json({ error: "Invalid email or password" });
       }
 
-      const payload = { userId: activeUser.id };
-      const shortAccessToken = await generateAccessToken(payload, "1m");
-      const refreshToken = await generateRefreshToken(payload);
+      req.session.userId = activeUser.id;
 
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+      // const payload = { userId: activeUser.id };
+      // const shortAccessToken = await generateAccessToken(payload, "1m");
+      // const refreshToken = await generateRefreshToken(payload);
 
-      res.json({ shortAccessToken });
+      // res.cookie("refreshToken", refreshToken, {
+      //   httpOnly: true,
+      //   secure: process.env.NODE_ENV === "production",
+      //   sameSite: "strict",
+      //   maxAge: 7 * 24 * 60 * 60 * 1000,
+      // });
+
+      res.json({ message: "Logged in successfully" });
     } catch (error) {
       console.error("Error in login:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   },
 
-  refreshToken: async (req, res) => {
-    try {
-      const { refreshToken } = req.cookies;
+  // refreshToken: async (req, res) => {
+  //   try {
+  //     const { refreshToken } = req.cookies;
 
-      const userData = await verifyRefreshToken(refreshToken);
+  //     const userData = await verifyRefreshToken(refreshToken);
 
-      const longAccessToken = await generateAccessToken(
-        {
-          userId: userData.userId,
-        },
-        "7d"
-      );
+  //     const longAccessToken = await generateAccessToken(
+  //       {
+  //         userId: userData.userId,
+  //       },
+  //       "7d"
+  //     );
 
-      res.json({
-        longAccessToken: longAccessToken,
-      });
-    } catch (error) {
-      console.error("Error in refreshToken:", error);
-      res.status(403).json({ error: "Invalid or expired refresh token" });
-    }
-  },
+  //     res.json({
+  //       longAccessToken: longAccessToken,
+  //     });
+  //   } catch (error) {
+  //     console.error("Error in refreshToken:", error);
+  //     res.status(403).json({ error: "Invalid or expired refresh token" });
+  //   }
+  // },
 
   logout: async (req, res) => {
     try {
-      const { refreshToken } = req.cookies;
+      // const { refreshToken } = req.cookies;
 
-      await deleteRefreshToken(refreshToken);
+      // await deleteRefreshToken(refreshToken);
 
-      res.clearCookie("refreshToken", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+      // res.clearCookie("refreshToken", {
+      //   httpOnly: true,
+      //   secure: process.env.NODE_ENV === "production",
+      //   sameSite: "strict",
+      // });
+
+      req.session.destroy((err) => {
+        if (err) {
+          return res.status(500).json({ error: "Failed to destroy session" });
+        }
+
+        res.json({ message: "Logged out successfully" });
       });
-
-      res.json({ message: "Logged out successfully" });
     } catch (error) {
       console.error("Error in logout:", error);
       res.status(500).json({ error: "Internal server error" });

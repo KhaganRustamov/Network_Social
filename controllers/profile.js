@@ -1,7 +1,5 @@
 const { prisma } = require("../prisma/prisma-client");
-const redisClient = require("../utils/redis-client");
 const cacheKeys = require("../utils/cacheKeys");
-const { deleteRefreshToken } = require("../utils/auth-token");
 
 const Profile = {
   getProfile: async (req, res) => {
@@ -17,7 +15,7 @@ const Profile = {
 
       //Get profile
       const profile = await prisma.user.findUnique({
-        where: { id: req.user.userId },
+        where: { id: userId },
         include: {
           followers: {
             include: {
@@ -104,7 +102,6 @@ const Profile = {
   deleteProfile: async (req, res) => {
     try {
       const { id } = req.params;
-      const { refreshToken } = req.cookies;
 
       await prisma.post.deleteMany({
         where: {
@@ -114,19 +111,17 @@ const Profile = {
 
       await prisma.user.delete({ where: { id } });
 
-      await deleteRefreshToken(refreshToken);
+      req.session.destroy((err) => {
+        if (err) {
+          return res.status(500).json({ error: "Failed to destroy session" });
+        }
 
-      res.clearCookie("refreshToken", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        res.json({ message: `Profile with id: ${id} deleted successfully` });
       });
 
       // Delete caches
       // await redisClient.del(cacheKeys.POSTS_ALL);
       // await redisClient.del(cacheKeys.PROFILE(id));
-
-      res.json({ message: `Profile with id: ${id} deleted successfully` });
     } catch (error) {
       console.error("Error in deleteProfile:", error);
       res.status(500).json({ error: "Internal server error" });

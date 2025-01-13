@@ -1,5 +1,4 @@
 const { prisma } = require("../prisma/prisma-client");
-const redisClient = require("../utils/redis-client");
 const cacheKeys = require("../utils/cacheKeys");
 
 const Post = {

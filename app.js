@@ -5,9 +5,22 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const fs = require("fs");
 const createError = require("http-errors");
+const session = require("express-session");
 
 const app = express();
 
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000,
+    },
+  })
+);
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
