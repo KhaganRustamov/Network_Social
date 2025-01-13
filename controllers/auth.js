@@ -26,10 +26,7 @@ const Auth = {
       });
       const existingName = await prisma.user.findFirst({ where: { name } });
 
-      if (existingEmail) {
-        return res.status(400).json({ error: "Email or name already exists" });
-      }
-      if (existingName) {
+      if (existingEmail || existingName) {
         return res.status(400).json({ error: "Email or name already exists" });
       }
 
@@ -113,7 +110,7 @@ const Auth = {
       );
 
       res.json({
-        accessToken: longAccessToken,
+        longAccessToken: longAccessToken,
       });
     } catch (error) {
       console.error("Error in refreshToken:", error);

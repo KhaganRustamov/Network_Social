@@ -37,7 +37,7 @@ const generateRefreshToken = async (payload) => {
     7 * 24 * 60 * 60,
     JSON.stringify(payload)
   );
-  console.log("Storing refresh token in Redis");
+  console.log("Generating refresh token");
   return refreshToken;
 };
 
@@ -45,6 +45,7 @@ const generateRefreshToken = async (payload) => {
 const verifyRefreshToken = async (refreshToken) => {
   const hashedToken = hashToken(refreshToken);
   const userData = await redisClient.get(hashedToken);
+  console.log("Verify refresh token");
   return JSON.parse(userData);
 };
 
