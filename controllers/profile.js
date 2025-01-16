@@ -48,6 +48,7 @@ const Profile = {
 
   updateProfile: async (req, res) => {
     try {
+      const { id } = req.params;
       const { email, name, dateOfBirth, bio, location } = req.body;
 
       let filePath;
@@ -56,22 +57,27 @@ const Profile = {
         filePath = req.file.path;
       }
 
+      if (!email && !name) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+
       // Check if the profile with such email or name exists
       if (email) {
         const existingEmail = await prisma.user.findUnique({
           where: { email },
         });
 
-        if (existingEmail && existingEmail.id !== parseInt(id)) {
+        if (existingEmail) {
           return res.status(400).json({ error: "Email already exists" });
         }
       }
+
       if (name) {
         const existingName = await prisma.user.findFirst({
           where: { name },
         });
 
-        if (existingName && existingName.id !== parseInt(id)) {
+        if (existingName) {
           return res.status(400).json({ error: "Name already exists" });
         }
       }
