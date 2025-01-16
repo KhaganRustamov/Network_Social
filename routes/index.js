@@ -10,6 +10,7 @@ const Profile = require("../controllers/profile");
 const { checkSession } = require("../middleware/checkSession");
 const { editProfile } = require("../middleware/editProfile");
 const { editComment } = require("../middleware/editComment");
+const { editPost } = require("../middleware/editPost");
 
 const uploadDestination = "uploads";
 
@@ -41,8 +42,8 @@ router.get("/users/:id", checkSession, User.getUserById);
 router.post("/posts", checkSession, Post.createPost);
 router.get("/posts", checkSession, Post.getAllPosts);
 router.get("/posts/:id", checkSession, Post.getPostById);
-router.delete("/posts/:id", checkSession, Post.deletePost);
-router.put("/posts/:id", checkSession, Post.updatePost);
+router.delete("/posts/:id", checkSession, editPost, Post.deletePost);
+router.put("/posts/:id", checkSession, editPost, Post.updatePost);
 
 // Comment routes
 router.post("/comments", checkSession, Comment.createComment);

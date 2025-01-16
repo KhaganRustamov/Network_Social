@@ -106,6 +106,7 @@ const Post = {
       if (!post) {
         return res.status(404).json({ error: "Post is not found" });
       }
+
       // Check liked post
       const postWithLikeInfo = {
         ...post,
@@ -132,17 +133,6 @@ const Post = {
     try {
       const { id } = req.params;
 
-      const post = await prisma.post.findUnique({ where: { id } });
-
-      if (!post) {
-        return res.status(404).json({ error: "Post is not found" });
-      }
-
-      // Checking that the user deleted own post
-      if (post.authorId !== req.user.userId) {
-        return res.status(403).json({ error: "Not access" });
-      }
-
       // Delete post and cache
       await prisma.post.delete({ where: { id } });
       // await redisClient.del(cacheKeys.POSTS_ALL);
@@ -158,17 +148,6 @@ const Post = {
     try {
       const { id } = req.params;
       const { content } = req.body;
-
-      const post = await prisma.post.findUnique({ where: { id } });
-
-      if (!post) {
-        return res.status(404).json({ error: "Post is not found" });
-      }
-
-      // Checking that the user update own post
-      if (post.authorId !== req.user.userId) {
-        return res.status(403).json({ error: "Not access" });
-      }
 
       // Update post
       const newPost = await prisma.post.update({
