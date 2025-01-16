@@ -78,6 +78,7 @@ const Auth = {
         return res.status(400).json({ error: "Invalid email or password" });
       }
 
+      // Create session for each user
       req.session.userId = activeUser.id;
 
       // const payload = { userId: activeUser.id };
@@ -132,11 +133,11 @@ const Auth = {
       //   sameSite: "strict",
       // });
 
+      // Delete session
       req.session.destroy((err) => {
         if (err) {
           return res.status(500).json({ error: "Failed to destroy session" });
         }
-
         res.json({ message: "Logged out successfully" });
       });
     } catch (error) {

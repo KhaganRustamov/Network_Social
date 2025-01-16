@@ -9,6 +9,7 @@ const Auth = require("../controllers/auth");
 const Profile = require("../controllers/profile");
 const { checkSession } = require("../middleware/checkSession");
 const { editProfile } = require("../middleware/editProfile");
+const { editComment } = require("../middleware/editComment");
 
 const uploadDestination = "uploads";
 
@@ -29,20 +30,8 @@ router.post("/logout", checkSession, Auth.logout);
 
 // Profile routes
 router.get("/profile", checkSession, Profile.getProfile);
-router.put(
-  "/profile/:id",
-  checkSession,
-
-  editProfile,
-  Profile.updateProfile
-);
-router.delete(
-  "/profile/:id",
-  checkSession,
-
-  editProfile,
-  Profile.deleteProfile
-);
+router.put("/profile/:id", checkSession, editProfile, Profile.updateProfile);
+router.delete("/profile/:id", checkSession, editProfile, Profile.deleteProfile);
 
 // User routes
 router.get("/users", checkSession, User.getAllUsers);
@@ -57,21 +46,16 @@ router.put("/posts/:id", checkSession, Post.updatePost);
 
 // Comment routes
 router.post("/comments", checkSession, Comment.createComment);
-router.put("/comments/:id", checkSession, Comment.updateComment);
+router.put("/comments/:id", checkSession, editComment, Comment.updateComment);
 router.delete(
   "/comments/:id",
   checkSession,
-
+  editComment,
   Comment.deleteComment
 );
 
 // Like routes
 router.post("/likes/post", checkSession, Like.toggleLikePost);
-router.post(
-  "/likes/comment",
-  checkSession,
-
-  Like.toggleLikeComment
-);
+router.post("/likes/comment", checkSession, Like.toggleLikeComment);
 
 module.exports = router;

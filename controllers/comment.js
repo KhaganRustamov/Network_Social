@@ -40,17 +40,6 @@ const Comment = {
       const { id } = req.params;
       const { content } = req.body;
 
-      const comment = await prisma.comment.findUnique({ where: { id } });
-
-      if (!comment) {
-        return res.status(404).json({ error: "Comment is not found" });
-      }
-
-      // Checking that the user update own comment
-      if (comment.userId !== req.user.userId) {
-        return res.status(403).json({ error: "Not access" });
-      }
-
       // Update comment
       const newComment = await prisma.comment.update({
         where: { id },
@@ -68,21 +57,9 @@ const Comment = {
   deleteComment: async (req, res) => {
     try {
       const { id } = req.params;
-
-      const comment = await prisma.comment.findUnique({ where: { id } });
-
-      if (!comment) {
-        return res.status(404).json({ error: "Comment is not found" });
-      }
-
-      // Checking that the user deleted own comment
-      if (comment.userId !== req.user.userId) {
-        return res.status(403).json({ error: "Not access" });
-      }
-
       // Delete comment
       await prisma.comment.delete({ where: { id } });
-      res.json("Comment deleted successfully");
+      res.json({ message: `Comment with id: ${id} deleted successfully` });
     } catch (error) {
       console.error("Error in delete comment:", error);
       res.status(500).json({ error: "Internal server error" });
