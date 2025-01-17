@@ -52,7 +52,26 @@ const User = {
       // Search user by id
       const user = await prisma.user.findUnique({
         where: { id },
-        include: { followers: true, following: true },
+        include: {
+          followers: {
+            select: {
+              follower: {
+                include: {
+                  password: false,
+                },
+              },
+            },
+          },
+          following: {
+            select: {
+              following: {
+                include: {
+                  password: false,
+                },
+              },
+            },
+          },
+        },
       });
 
       if (!user) {

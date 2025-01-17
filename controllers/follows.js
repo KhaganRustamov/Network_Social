@@ -13,9 +13,7 @@ const Follows = {
       }
 
       const existingSubscription = await prisma.follows.findFirst({
-        where: {
-          AND: [{ followerId: userId }, { followingId: followingId }],
-        },
+        where: { followerId: userId },
       });
 
       if (existingSubscription) {
@@ -56,13 +54,13 @@ const Follows = {
       }
 
       const existingSubscription = await prisma.follows.findFirst({
-        where: {
-          AND: [{ followerId: userId }, { followingId: followingId }],
-        },
+        where: { followerId: userId },
       });
 
       if (!existingSubscription) {
-        return res.status(403).json({ message: "Subscription is not found" });
+        return res
+          .status(403)
+          .json({ message: "Subscription already deleted" });
       }
 
       await prisma.follows.delete({

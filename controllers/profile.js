@@ -18,13 +18,21 @@ const Profile = {
         where: { id: userId },
         include: {
           followers: {
-            include: {
-              follower: true,
+            select: {
+              follower: {
+                include: {
+                  password: false,
+                },
+              },
             },
           },
           following: {
-            include: {
-              following: true,
+            select: {
+              following: {
+                include: {
+                  password: false,
+                },
+              },
             },
           },
         },
