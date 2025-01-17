@@ -48,8 +48,19 @@ const Post = {
           },
           comments: {
             include: {
-              likes: true,
-              user: true,
+              postId: false,
+              user: {
+                include: {
+                  id: false,
+                  password: false,
+                  email: false,
+                },
+              },
+              likes: {
+                include: {
+                  commentId: false,
+                },
+              },
             },
           },
         },
