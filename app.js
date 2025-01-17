@@ -6,14 +6,19 @@ const logger = require("morgan");
 const fs = require("fs");
 const createError = require("http-errors");
 const session = require("express-session");
+const { RedisStore } = require("connect-redis");
+const redisClient = require("./utils/redis-client");
 
 const app = express();
 
 app.use(
   session({
+    store: new RedisStore({
+      client: redisClient,
+    }),
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

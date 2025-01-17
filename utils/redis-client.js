@@ -1,23 +1,27 @@
-// const redis = require("redis");
+const redis = require("redis");
 
-// const redisClient = redis.createClient();
+const redisClient = redis.createClient();
 
-// redisClient.on("error", (err) => {
-//   console.error("Redis error:", err);
-// });
+redisClient.on("error", (err) => {
+  console.error("Redis error:", err);
+});
 
-// (async () => {
-//   if (!redisClient.isOpen) {
-//     await redisClient.connect();
-//     console.log("Redis connected");
-//   }
-// })();
+(async () => {
+  try {
+    if (!redisClient.isOpen) {
+      await redisClient.connect();
+      console.log("Redis connected");
+    }
+  } catch (err) {
+    console.error("Error connecting to Redis:", err);
+  }
+})();
 
-// process.on("SIGINT", async () => {
-//   if (redisClient.isOpen) {
-//     await redisClient.quit();
-//   }
-//   process.exit(0);
-// });
+process.on("SIGINT", async () => {
+  if (redisClient.isOpen) {
+    await redisClient.quit();
+  }
+  process.exit(0);
+});
 
-// module.exports = redisClient;
+module.exports = redisClient;
