@@ -1,27 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
+
 const User = require("../controllers/user");
 const Post = require("../controllers/post");
 const Comment = require("../controllers/comment");
 const Like = require("../controllers/like");
 const Auth = require("../controllers/auth");
 const Profile = require("../controllers/profile");
+const Follows = require("../controllers/follows");
+
 const { checkSession } = require("../middleware/checkSession");
 const { editProfile } = require("../middleware/editProfile");
 const { editComment } = require("../middleware/editComment");
 const { editPost } = require("../middleware/editPost");
-
-const uploadDestination = "uploads";
-
-const storage = multer.diskStorage({
-  destination: uploadDestination,
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
-});
-
-const uploads = multer({ storage: storage });
 
 // Auth routes
 router.post("/register", Auth.register);
@@ -58,5 +49,9 @@ router.delete(
 // Like routes
 router.post("/likes/post", checkSession, Like.toggleLikePost);
 router.post("/likes/comment", checkSession, Like.toggleLikeComment);
+
+// Follows routes
+router.post("/follows", checkSession, Follows.followUser);
+router.delete("/follows", checkSession, Follows.unfollowUser);
 
 module.exports = router;
