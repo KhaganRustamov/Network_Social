@@ -41,7 +41,11 @@ const Post = {
       // Get all posts
       const posts = await prisma.post.findMany({
         include: {
-          likes: true,
+          likes: {
+            include: {
+              postId: false,
+            },
+          },
           comments: {
             include: {
               likes: true,

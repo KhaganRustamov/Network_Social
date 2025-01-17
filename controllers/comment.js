@@ -25,7 +25,14 @@ const Comment = {
           postId,
           content,
         },
-        include: { user: true },
+        include: {
+          user: {
+            include: {
+              id: false,
+              password: false,
+            },
+          },
+        },
       });
 
       res.json(comment);
