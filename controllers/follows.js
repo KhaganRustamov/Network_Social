@@ -8,7 +8,7 @@ const Follows = {
 
       if (followingId === userId) {
         return res
-          .status(400)
+          .status(403)
           .json({ message: "You can't subscribe to yourself" });
       }
 
@@ -17,7 +17,7 @@ const Follows = {
       });
 
       if (existingSubscription) {
-        return res.status(403).json({ message: "Subscription already exists" });
+        return res.status(400).json({ message: "Subscription already exists" });
       }
 
       await prisma.follows.create({
@@ -49,7 +49,7 @@ const Follows = {
 
       if (followingId === userId) {
         return res
-          .status(400)
+          .status(403)
           .json({ message: "You can't unsubscribe to yourself" });
       }
 
@@ -59,7 +59,7 @@ const Follows = {
 
       if (!existingSubscription) {
         return res
-          .status(403)
+          .status(400)
           .json({ message: "Subscription already deleted" });
       }
 
