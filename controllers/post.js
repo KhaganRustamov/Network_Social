@@ -108,11 +108,33 @@ const Post = {
       const post = await prisma.post.findUnique({
         where: { id },
         include: {
-          likes: true,
-          author: true,
+          likes: {
+            include: {
+              postId: false,
+            },
+          },
+          author: {
+            include: {
+              id: false,
+              email: false,
+              password: false,
+            },
+          },
           comments: {
             include: {
-              user: true,
+              postId: false,
+              user: {
+                include: {
+                  id: false,
+                  password: false,
+                  email: false,
+                },
+              },
+              likes: {
+                include: {
+                  commentId: false,
+                },
+              },
             },
           },
         },

@@ -17,6 +17,7 @@ const Profile = {
       const profile = await prisma.user.findUnique({
         where: { id: userId },
         include: {
+          password: false,
           followers: {
             select: {
               follower: {

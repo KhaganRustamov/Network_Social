@@ -14,10 +14,8 @@ const User = {
 
       // Get all users
       const users = await prisma.user.findMany({
-        select: {
-          name: true,
-          avatarUrl: true,
-          dateOfBirth: true,
+        include: {
+          password: false,
         },
         orderBy: {
           createdAt: "asc",
@@ -53,6 +51,7 @@ const User = {
       const user = await prisma.user.findUnique({
         where: { id },
         include: {
+          password: false,
           followers: {
             select: {
               follower: {
