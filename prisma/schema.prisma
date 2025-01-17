@@ -21,7 +21,7 @@ model User {
   likesComment LikeComment[]
   comments     Comment[]
   followers    Follows[] @relation("following")
-  following    Follows[] @relation("follower")
+  followings    Follows[] @relation("follower")
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
