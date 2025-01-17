@@ -6,6 +6,7 @@ const Follows = {
       const { followingId } = req.body;
       const userId = req.user.userId;
 
+      // Check if the current user subscribe the other users
       if (followingId === userId) {
         return res
           .status(403)
@@ -20,6 +21,7 @@ const Follows = {
         return res.status(400).json({ message: "Subscription already exists" });
       }
 
+      // Create subscription
       await prisma.follows.create({
         data: {
           follower: {
@@ -47,6 +49,7 @@ const Follows = {
       const { followingId } = req.body;
       const userId = req.user.userId;
 
+      // Check if the current user unsubscribe the other users
       if (followingId === userId) {
         return res
           .status(403)
@@ -63,6 +66,7 @@ const Follows = {
           .json({ message: "Subscription already deleted" });
       }
 
+      // Delete subscription
       await prisma.follows.delete({
         where: {
           id: existingSubscription.id,

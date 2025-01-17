@@ -118,14 +118,17 @@ const Profile = {
     try {
       const { id } = req.params;
 
+      // Delete posts
       await prisma.post.deleteMany({
         where: {
           authorId: id,
         },
       });
 
+      // Delete user
       await prisma.user.delete({ where: { id } });
 
+      // Delete session
       req.session.destroy((err) => {
         if (err) {
           return res.status(500).json({ error: "Failed to destroy session" });

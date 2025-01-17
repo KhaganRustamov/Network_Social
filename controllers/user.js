@@ -77,7 +77,7 @@ const User = {
         return res.status(404).json({ error: "User is not found or deleted" });
       }
 
-      // Check if the current user is subscribed to the user being searched for
+      // Check if the current user is subscribed to another user
       const isFollowing = await prisma.follows.findFirst({
         where: { AND: { followerId: userId, followingId: id } },
       });

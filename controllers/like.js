@@ -37,7 +37,7 @@ const Like = {
 
       res.json(like);
     } catch (error) {
-      console.error("Error in like post:", error);
+      console.error("Error in toggleLikePost:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   },
@@ -74,7 +74,7 @@ const Like = {
 
       res.json(like);
     } catch (error) {
-      console.error("Error in like comment:", error);
+      console.error("Error in toggleLikeComment:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   },
