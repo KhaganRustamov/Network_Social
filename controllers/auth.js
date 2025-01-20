@@ -16,10 +16,27 @@ const Auth = {
   register: async (req, res) => {
     try {
       const { email, password, name } = req.body;
+      const userIP = req.ip === "::1" ? "localhost" : req.ip;
+      const ipKey = `register:ip:${userIP}`;
 
       // Checking the fields
       if (!email || !password || !name) {
         return res.status(400).json({ error: "All fields are required" });
+      }
+
+      // Checking registrations from this IP-address
+      let registrationCount = await redisClient.get(ipKey);
+
+      if (registrationCount) {
+        registrationCount = parseInt(registrationCount, 10);
+      } else {
+        registrationCount = 0;
+      }
+
+      if (registrationCount >= 3) {
+        return res.status(429).json({
+          error: "Registration limit reached. Try again later.",
+        });
       }
 
       // Check if a user with such email or name exists
@@ -53,6 +70,16 @@ const Auth = {
 
       // Delete cache
       await redisClient.del(cacheKeys.USERS_ALL);
+
+      // Increment limit count
+      const newCount = await redisClient.incr(ipKey);
+      console.log(newCount);
+
+      // Reset limit
+      if (newCount === 1) {
+        console.log(newCount);
+        await redisClient.set(ipKey, { exp: 3600 });
+      }
 
       res.json(user);
     } catch (error) {
