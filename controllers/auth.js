@@ -3,6 +3,8 @@ const path = require("path");
 const fs = require("fs");
 const { prisma } = require("../prisma/prisma-client");
 const Jdenticon = require("jdenticon");
+const cacheKeys = require("../utils/cacheKeys");
+const redisClient = require("../utils/redis-client");
 // const {
 //   generateAccessToken,
 //   generateRefreshToken,
@@ -48,6 +50,9 @@ const Auth = {
           avatarUrl: `/uploads/${avatarName}`,
         },
       });
+
+      // Delete cache
+      await redisClient.del(cacheKeys.USERS_ALL);
 
       res.json(user);
     } catch (error) {

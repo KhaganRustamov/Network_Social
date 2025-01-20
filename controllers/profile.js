@@ -1,17 +1,11 @@
 const { prisma } = require("../prisma/prisma-client");
 const cacheKeys = require("../utils/cacheKeys");
+const redisClient = require("../utils/redis-client");
 
 const Profile = {
   getProfile: async (req, res) => {
     try {
       const userId = req.user.userId;
-      // const cachedProfile = await redisClient.get(cacheKeys.PROFILE(userId));
-
-      // // Check cached profile
-      // if (cachedProfile) {
-      //   console.log("Returning cached profile");
-      //   return res.json(JSON.parse(cachedProfile));
-      // }
 
       //Get profile
       const profile = await prisma.user.findUnique({
@@ -38,15 +32,6 @@ const Profile = {
           },
         },
       });
-
-      // Set cache
-      // await redisClient.set(
-      //   cacheKeys.PROFILE(userId),
-      //   JSON.stringify(profile),
-      //   {
-      //     EX: 3600,
-      //   }
-      // );
 
       res.json(profile);
     } catch (error) {
@@ -105,7 +90,7 @@ const Profile = {
       });
 
       // Delete cache
-      // await redisClient.del(cacheKeys.PROFILE(id));
+      await redisClient.del(cacheKeys.USERS_ALL);
 
       res.json(profileUpdate);
     } catch (error) {
@@ -137,9 +122,9 @@ const Profile = {
         res.json({ message: `Profile with id: ${id} deleted successfully` });
       });
 
-      // Delete caches
-      // await redisClient.del(cacheKeys.POSTS_ALL);
-      // await redisClient.del(cacheKeys.PROFILE(id));
+      // Delete caches for user and his posts
+      await redisClient.del(cacheKeys.POSTS_ALL);
+      await redisClient.del(cacheKeys.USERS_ALL);
     } catch (error) {
       console.error("Error in deleteProfile:", error);
       res.status(500).json({ error: "Internal server error" });

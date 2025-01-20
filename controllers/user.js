@@ -1,16 +1,17 @@
 const { prisma } = require("../prisma/prisma-client");
 const cacheKeys = require("../utils/cacheKeys");
+const redisClient = require("../utils/redis-client");
 
 const User = {
   getAllUsers: async (req, res) => {
     try {
-      // const cachedUsers = await redisClient.get(cacheKeys.USERS_ALL);
+      const cachedUsers = await redisClient.get(cacheKeys.USERS_ALL);
 
-      // // Check cached users
-      // if (cachedUsers) {
-      //   console.log("Returning cached users");
-      //   return res.json(JSON.parse(cachedUsers));
-      // }
+      // Check cached users
+      if (cachedUsers) {
+        console.log("Returning cached users");
+        return res.json(JSON.parse(cachedUsers));
+      }
 
       // Get all users
       const users = await prisma.user.findMany({
@@ -23,9 +24,9 @@ const User = {
       });
 
       // Set cache
-      // await redisClient.set(cacheKeys.USERS_ALL, JSON.stringify(users), {
-      //   EX: 3600,
-      // });
+      await redisClient.set(cacheKeys.USERS_ALL, JSON.stringify(users), {
+        EX: 3600,
+      });
 
       res.json(users);
     } catch (error) {
@@ -38,14 +39,6 @@ const User = {
     try {
       const { id } = req.params;
       const userId = req.user.userId;
-
-      // const cachedUser = await redisClient.get(cacheKeys.USER_BY_ID(id));
-
-      // // Check cached user
-      // if (cachedUser) {
-      //   console.log("Returning cached user");
-      //   return res.json(JSON.parse(cachedUser));
-      // }
 
       // Search user by id
       const user = await prisma.user.findUnique({
@@ -81,11 +74,6 @@ const User = {
       const isFollowing = await prisma.follows.findFirst({
         where: { AND: { followerId: userId, followingId: id } },
       });
-
-      // Set cache
-      // await redisClient.set(cacheKeys.USER_BY_ID(id), JSON.stringify(user), {
-      //   EX: 3600,
-      // });
 
       res.json({ ...user, isFollowing: Boolean(isFollowing) });
     } catch (error) {
