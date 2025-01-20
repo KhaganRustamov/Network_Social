@@ -73,11 +73,9 @@ const Auth = {
 
       // Increment limit count
       const newCount = await redisClient.incr(ipKey);
-      console.log(newCount);
 
       // Reset limit
       if (newCount === 1) {
-        console.log(newCount);
         await redisClient.set(ipKey, { exp: 3600 });
       }
 
