@@ -1,5 +1,6 @@
 const { prisma } = require("../prisma/prisma-client");
 const cacheKeys = require("../utils/cacheKeys");
+const redisClient = require("../utils/redis-client");
 
 const Post = {
   createPost: async (req, res) => {
@@ -19,7 +20,9 @@ const Post = {
         },
       });
 
-      // await redisClient.del(cacheKeys.POSTS_ALL);
+      // Delete cache
+      await redisClient.del(cacheKeys.POSTS_ALL);
+
       res.json(post);
     } catch (error) {
       console.error("Error in create post:", error);
@@ -30,13 +33,13 @@ const Post = {
   getAllPosts: async (req, res) => {
     try {
       const userId = req.user.userId;
-      // const cachedPosts = await redisClient.get(cacheKeys.POSTS_ALL);
+      const cachedPosts = await redisClient.get(cacheKeys.POSTS_ALL);
 
-      // // Check cached posts
-      // if (cachedPosts) {
-      //   console.log("Returning cached posts");
-      //   return res.json(JSON.parse(cachedPosts));
-      // }
+      // Check cached posts
+      if (cachedPosts) {
+        console.log("Returning cached posts");
+        return res.json(JSON.parse(cachedPosts));
+      }
 
       // Get all posts
       const posts = await prisma.post.findMany({
@@ -76,13 +79,13 @@ const Post = {
       }));
 
       // Set cache
-      // await redisClient.set(
-      //   cacheKeys.POSTS_ALL,
-      //   JSON.stringify(postWithLikeInfo),
-      //   {
-      //     EX: 3600,
-      //   }
-      // );
+      await redisClient.set(
+        cacheKeys.POSTS_ALL,
+        JSON.stringify(postWithLikeInfo),
+        {
+          EX: 3600,
+        }
+      );
 
       res.json(postWithLikeInfo);
     } catch (error) {
@@ -95,14 +98,6 @@ const Post = {
     try {
       const { id } = req.params;
       const userId = req.user.userId;
-
-      // const cachedPost = await redisClient.get(cacheKeys.POST_BY_ID(id));
-
-      // Check cached post
-      // if (cachedPost) {
-      //   console.log("Returning cached post");
-      //   return res.json(JSON.parse(cachedPost));
-      // }
 
       // Get post by id
       const post = await prisma.post.findUnique({
@@ -150,15 +145,6 @@ const Post = {
         likedByUser: post.likes.some((like) => like.userId === userId),
       };
 
-      // Set cache
-      // await redisClient.set(
-      //   cacheKeys.POST_BY_ID(id),
-      //   JSON.stringify(postWithLikeInfo),
-      //   {
-      //     EX: 3600,
-      //   }
-      // );
-
       res.json(postWithLikeInfo);
     } catch (error) {
       console.error("Error in getPostById:", error);
@@ -172,7 +158,7 @@ const Post = {
 
       // Delete post and cache
       await prisma.post.delete({ where: { id } });
-      // await redisClient.del(cacheKeys.POSTS_ALL);
+      await redisClient.del(cacheKeys.POSTS_ALL);
 
       res.json({ message: `Post with id: ${id} deleted successfully` });
     } catch (error) {
@@ -195,7 +181,7 @@ const Post = {
       });
 
       // Delete cache and update post
-      // await redisClient.del(cacheKeys.POSTS_ALL);
+      await redisClient.del(cacheKeys.POSTS_ALL);
 
       res.json(newPost);
     } catch (error) {
